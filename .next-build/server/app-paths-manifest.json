@@ -1,0 +1,23 @@
+{
+  "/(workspace)/chat/page": "app/(workspace)/chat/page.js",
+  "/(workspace)/dashboard/page": "app/(workspace)/dashboard/page.js",
+  "/(workspace)/email/page": "app/(workspace)/email/page.js",
+  "/(workspace)/matches/page": "app/(workspace)/matches/page.js",
+  "/(workspace)/profiles/[id]/edit/page": "app/(workspace)/profiles/[id]/edit/page.js",
+  "/(workspace)/profiles/[id]/page": "app/(workspace)/profiles/[id]/page.js",
+  "/(workspace)/profiles/new/page": "app/(workspace)/profiles/new/page.js",
+  "/(workspace)/profiles/page": "app/(workspace)/profiles/page.js",
+  "/(workspace)/settings/page": "app/(workspace)/settings/page.js",
+  "/(workspace)/workflow/page": "app/(workspace)/workflow/page.js",
+  "/_global-error/page": "app/_global-error/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/auth/[...path]/route": "app/api/auth/[...path]/route.js",
+  "/api/bootstrap/route": "app/api/bootstrap/route.js",
+  "/api/webhooks/resend/route": "app/api/webhooks/resend/route.js",
+  "/api/workspace/[...path]/route": "app/api/workspace/[...path]/route.js",
+  "/icon.svg/route": "app/icon.svg/route.js",
+  "/login/page": "app/login/page.js",
+  "/page": "app/page.js",
+  "/register/page": "app/register/page.js",
+  "/setup/page": "app/setup/page.js"
+}

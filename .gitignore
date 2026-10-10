@@ -1,0 +1,15 @@
+node_modules/
+.next/
+.next-stage8-failed-*/
+.next-verify-*/
+out/
+coverage/
+test-results/
+*.tsbuildinfo
+.env*
+!.env.example
+src/generated/
+*.sqlite*
+next-env.d.ts
+.browser-specs-local/
+.playwright-preflight.config.ts

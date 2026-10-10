@@ -1,0 +1,31 @@
+import { execFileSync } from "node:child_process";
+import fs from "node:fs";
+import { chromium, expect } from "@playwright/test";
+export default async function setup() {
+ execFileSync(process.execPath, ["--import","tsx","scripts/browser-prepare.ts"], { env: process.env, stdio: "inherit" });
+ fs.mkdirSync("test-results/screenshots",{recursive:true});
+ const browser=await chromium.launch({channel:"chrome"});
+ const page=await browser.newPage({viewport:{width:390,height:844}});
+ page.setDefaultTimeout(20000); page.setDefaultNavigationTimeout(30000); await page.bringToFront();
+ await page.goto("http://127.0.0.1:3100/setup");
+ await expect(page.getByRole("heading",{name:"Set up your workspace."})).toBeVisible();
+ expect((await page.content()).includes(process.env.MATCHMAKER_SETUP_TOKEN!)).toBe(false);
+ await page.screenshot({path:"test-results/screenshots/stage4-setup-mobile.png",fullPage:true});
+ await page.getByLabel("Setup token").fill(process.env.MATCHMAKER_SETUP_TOKEN!);
+ await page.getByLabel("Your name").fill("Browser Fixture Matchmaker");
+ await page.getByLabel("Email",{exact:true}).fill("browser@example.invalid");
+ await page.getByLabel("Password",{exact:true}).fill("Synthetic-browser-passphrase-2026");
+ await page.getByRole("button",{name:"Create single account"}).click();
+ await expect(page.getByRole("heading",{name:"Your account is ready."})).toBeVisible();
+ await page.getByRole("link",{name:"Go to login"}).click();
+ await page.getByLabel("Email",{exact:true}).fill("browser@example.invalid");
+ await page.getByLabel("Password",{exact:true}).fill("Synthetic-browser-passphrase-2026");
+ await page.getByRole("button",{name:"Sign in",exact:true}).click();
+ await expect(page).toHaveURL(/dashboard$/);
+ await expect(page.locator(".metric").first().locator("strong")).toHaveText("00");
+ await page.screenshot({path:"test-results/screenshots/stage4-empty-dashboard-mobile.png",fullPage:true});
+ const seeded=await page.request.post("http://127.0.0.1:3100/api/workspace/demo/seed",{headers:{Origin:"http://127.0.0.1:3100"},data:{confirmation:"SEED DEMO"}});
+ expect(seeded.ok()).toBe(true);
+ await page.context().storageState({path:"test-results/browser-auth.json"});
+ await browser.close();
+}

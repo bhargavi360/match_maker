@@ -1,0 +1,394 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model SystemState {
+  id                 Int      @id @default(1)
+  bootstrapCompleted Boolean  @default(false)
+  maintenance        Boolean  @default(false)
+  createdAt          DateTime @default(now())
+}
+
+model User {
+  id            String             @id
+  slot          Int                @unique @default(1)
+  name          String
+  email         String             @unique
+  emailVerified Boolean            @default(false)
+  image         String?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  accounts      Account[]
+  sessions      Session[]
+  conversations ChatConversation[]
+  profiles      Profile[]
+  appSettings   AppSettings?
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  password              String?
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+  @@index([userId])
+}
+
+model Session {
+  id        String   @id
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+}
+
+model RateLimitBucket {
+  key       String @id
+  count     Int
+  expiresAt BigInt
+}
+
+model AppSettings {
+  id        Int      @id @default(autoincrement())
+  ownerId   String   @unique
+  version   Int      @default(1)
+  weights   Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+}
+
+model Profile {
+  id                     String             @id @default(uuid())
+  ownerId                String
+  kind                   String             @default("REAL")
+  demoKey                String?
+  status                 String             @default("ACTIVE")
+  displayName            String
+  reportedAge            Int?
+  ageConfirmedOn         String?
+  city                   String?
+  region                 String?
+  country                String?
+  education              String?
+  occupation             String?
+  interests              Json
+  values                 Json
+  relationshipGoals      Json
+  lifestyle              Json
+  communicationStyle     String?
+  bio                    String?
+  revision               Int                @default(1)
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+  contact                ProfileContact?
+  preference             PartnerPreference?
+  consents               ProfileConsent[]
+  sourceWorkflows        Workflow[]         @relation("WorkflowSource")
+  candidateWorkflows     Workflow[]         @relation("WorkflowCandidate")
+  emailDrafts            EmailDraft[]
+  sourceConversations    ChatConversation[] @relation("ChatSource")
+  candidateConversations ChatConversation[] @relation("ChatCandidate")
+  owner                  User               @relation(fields: [ownerId], references: [id], onDelete: Restrict)
+
+  @@unique([ownerId, demoKey])
+  @@index([ownerId, kind, status, createdAt])
+}
+
+model ProfileContact {
+  profileId  String   @id
+  ciphertext String
+  keyId      String
+  revision   Int      @default(1)
+  updatedAt  DateTime @updatedAt
+  profile    Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
+
+model PartnerPreference {
+  profileId String   @id
+  data      Json
+  revision  Int      @default(1)
+  updatedAt DateTime @updatedAt
+  profile   Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
+
+model ProfileConsent {
+  id            String   @id @default(uuid())
+  profileId     String
+  scope         String
+  status        String
+  policyVersion String
+  provenance    String
+  synthetic     Boolean  @default(false)
+  revision      Int      @default(1)
+  changedAt     DateTime @default(now())
+  profile       Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, scope])
+}
+
+model AuditEvent {
+  id        String   @id @default(uuid())
+  action    String
+  actorId   String?
+  entityId  String?
+  fields    Json
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+model Workflow {
+  id               String               @id @default(uuid())
+  sourceId         String
+  sourceRevision   Int
+  candidateId      String?
+  snapshotId       String?
+  currentStep      Int                  @default(1)
+  status           String               @default("IN_PROGRESS")
+  reviewedAt       DateTime?
+  reviewedBy       String?
+  revision         Int                  @default(1)
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  archivedAt       DateTime?
+  source           Profile              @relation("WorkflowSource", fields: [sourceId], references: [id], onDelete: Cascade)
+  candidate        Profile?             @relation("WorkflowCandidate", fields: [candidateId], references: [id], onDelete: Cascade)
+  selectedSnapshot AssessmentSnapshot?  @relation("SelectedSnapshot", fields: [snapshotId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  snapshots        AssessmentSnapshot[] @relation("WorkflowSnapshots")
+  decisions        MatchDecision[]
+  emailDrafts      EmailDraft[]
+
+  @@index([status, updatedAt])
+  @@index([sourceId, candidateId])
+  @@index([candidateId])
+}
+
+model AssessmentSnapshot {
+  id          String          @id @default(uuid())
+  workflowId  String
+  sourceId    String
+  candidateId String
+  stamp       String
+  assessment  Json
+  createdAt   DateTime        @default(now())
+  workflow    Workflow        @relation("WorkflowSnapshots", fields: [workflowId], references: [id], onDelete: Cascade)
+  selectedBy  Workflow[]      @relation("SelectedSnapshot")
+  decisions   MatchDecision[]
+
+  @@unique([workflowId, id])
+  @@index([sourceId, candidateId])
+}
+
+model MatchDecision {
+  id          String             @id @default(uuid())
+  workflowId  String
+  snapshotId  String
+  sourceId    String
+  candidateId String
+  type        String
+  actorId     String
+  sequence    Int
+  reviewedAt  DateTime?
+  createdAt   DateTime           @default(now())
+  workflow    Workflow           @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  snapshot    AssessmentSnapshot @relation(fields: [workflowId, snapshotId], references: [workflowId, id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([workflowId, sequence])
+  @@index([sourceId, candidateId, createdAt])
+}
+
+model EmailDraft {
+  id                 String          @id @default(uuid())
+  workflowId         String
+  recipientProfileId String
+  decisionId         String
+  snapshotId         String
+  revision           Int             @default(1)
+  ciphertext         String
+  keyId              String
+  provenance         String          @default("LOCAL_TEMPLATE")
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  workflow           Workflow        @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  recipient          Profile         @relation(fields: [recipientProfileId], references: [id], onDelete: Cascade)
+  deliveries         EmailDelivery[]
+
+  @@index([workflowId, updatedAt])
+}
+
+model EmailDelivery {
+  id                 String               @id
+  draftId            String?
+  originalDraftId    String
+  draftRevision      Int
+  workflowId         String
+  recipientProfileId String
+  decisionId         String
+  snapshotId         String
+  payloadCiphertext  String
+  keyId              String
+  payloadDigest      String
+  approvedBy         String
+  approvedAt         DateTime
+  expiresAt          DateTime
+  state              String               @default("APPROVED")
+  revision           Int                  @default(1)
+  providerMessageId  String?              @unique
+  idempotencyKey     String               @unique
+  attemptCount       Int                  @default(0)
+  firstAttemptAt     DateTime?
+  retryUntil         DateTime?
+  retryBlocked       Boolean              @default(false)
+  transportKeyDigest String?
+  leaseToken         String?
+  leaseUntil         DateTime?
+  evidenceAt         DateTime?
+  evidenceType       String?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  draft              EmailDraft?          @relation(fields: [draftId], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  attempts           EmailSendAttempt[]
+  events             EmailProviderEvent[]
+
+  @@index([workflowId, createdAt])
+  @@index([originalDraftId, draftRevision])
+}
+
+model EmailSendAttempt {
+  id                String        @id @default(uuid())
+  deliveryId        String
+  number            Int
+  operationId       String        @unique
+  startedAt         DateTime
+  finishedAt        DateTime?
+  outcome           String        @default("PENDING")
+  providerMessageId String?
+  errorCode         String?
+  delivery          EmailDelivery @relation(fields: [deliveryId], references: [id], onDelete: Restrict)
+
+  @@unique([deliveryId, number])
+}
+
+model EmailProviderEvent {
+  id                String         @id
+  providerMessageId String
+  type              String
+  source            String
+  occurredAt        DateTime
+  receivedAt        DateTime       @default(now())
+  deliveryId        String?
+  deliveryTag       String?
+  evidenceDigest    String
+  delivery          EmailDelivery? @relation(fields: [deliveryId], references: [id], onDelete: Restrict)
+
+  @@index([providerMessageId, occurredAt])
+  @@index([deliveryTag])
+}
+
+model ChatConversation {
+  id              String         @id @default(uuid())
+  ownerId         String
+  sourceId        String?
+  candidateId     String?
+  workflowId      String?
+  draftId         String?
+  kind            String
+  titleCiphertext String
+  keyId           String
+  state           String         @default("ACTIVE")
+  revision        Int            @default(1)
+  nextSequence    Int            @default(1)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  owner           User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  source          Profile?       @relation("ChatSource", fields: [sourceId], references: [id], onDelete: Cascade)
+  candidate       Profile?       @relation("ChatCandidate", fields: [candidateId], references: [id], onDelete: Cascade)
+  messages        ChatMessage[]
+  proposals       ChatProposal[]
+
+  @@index([ownerId, state, updatedAt, id])
+  @@index([sourceId])
+  @@index([candidateId])
+}
+
+model ChatMessage {
+  id             String           @id @default(uuid())
+  conversationId String
+  sequence       Int
+  requestId      String
+  requestDigest  String
+  role           String
+  origin         String           @default("LOCAL")
+  status         String           @default("PROCESSING")
+  task           String
+  ciphertext     String
+  keyId          String
+  leaseUntil     DateTime?
+  leaseToken     String?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  conversation   ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, sequence])
+  @@unique([conversationId, requestId, role])
+  @@index([conversationId, sequence])
+}
+
+model ChatProposal {
+  id                String           @id @default(uuid())
+  conversationId    String
+  kind              String
+  ciphertext        String
+  keyId             String
+  digest            String
+  requestDigest     String
+  state             String           @default("PROPOSED")
+  revision          Int              @default(1)
+  expiresAt         DateTime
+  confirmedBy       String?
+  confirmedAt       DateTime?
+  confirmedRevision Int?
+  executedAt        DateTime?
+  result            Json?
+  errorCode         String?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  conversation      ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt, id])
+  @@index([state, expiresAt])
+}

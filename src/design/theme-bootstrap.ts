@@ -1,0 +1,2 @@
+// Static, first-paint initialization. Never interpolate customer or request data.
+export const themeBootstrap = `(function(){try{var v=localStorage.getItem('matchmaker-visual-theme');document.documentElement.dataset.theme=(v==='light'||v==='dark')?v:(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light')}catch(e){document.documentElement.dataset.theme=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}})()`;

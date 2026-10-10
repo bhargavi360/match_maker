@@ -1,0 +1,27 @@
+{
+  "method": "OpenAI built-in imagegen tool",
+  "usage": "Created specifically for this project's synthetic frontend preview; no third-party stock assets or license claims.",
+  "notes": "All faces are generated fictional adults. No reference photograph, customer data, or legacy asset was used. Original output files were preserved. WebP conversion only changes encoding and size, not depicted content.",
+  "assets": [
+    {
+      "file": "aanya.webp",
+      "prompt": "Use case: photorealistic-natural. Asset type: locally bundled synthetic demo portrait for an internal professional matchmaking application's preview screens. Subject: a fictional South Asian woman around age 31 with shoulder-length dark wavy hair, warm brown eyes, a natural smile, wearing a cream linen shirt, in a softly blurred leafy outdoor courtyard. Entirely invented adult face; no reference person or recognizable public figure. Medium: natural editorial lifestyle photography, authentic skin texture, soft daylight, calm neutral color palette. Composition: vertical 4:5 portrait, waist-to-head framing, face in upper third with comfortable space above the head, subject looking toward the camera. No text, logos, watermark, phone, jewelry branding, collage, or UI. One person only."
+    },
+    {
+      "file": "ishaan.webp",
+      "prompt": "Use case: photorealistic-natural. Asset type: locally bundled synthetic demo portrait for an internal professional matchmaking application's preview screens. Subject: a fictional South Asian man around age 34 with short dark hair and a neatly kept beard, a relaxed friendly smile, wearing a muted olive overshirt, in a softly blurred sunny city garden. Entirely invented adult face; no reference person or recognizable public figure. Medium: natural editorial lifestyle photography, authentic skin texture, soft daylight, calm neutral color palette. Composition: vertical 4:5 portrait, waist-to-head framing, face in upper third with comfortable space above the head, subject looking toward the camera. No text, logos, watermark, phone, jewelry branding, collage, or UI. One person only."
+    },
+    {
+      "file": "lina.webp",
+      "prompt": "Use case: photorealistic-natural. Asset type: locally bundled synthetic demo portrait for an internal professional matchmaking application's preview screens. Subject: a fictional East Asian woman around age 30 with straight dark hair, a natural warm smile, wearing a navy cotton top, in a softly blurred light-filled studio. Entirely invented adult face; no reference person or recognizable public figure. Medium: natural editorial lifestyle photography, authentic skin texture, soft daylight, calm neutral color palette. Composition: vertical 4:5 portrait, waist-to-head framing, face in upper third with comfortable space above the head, subject looking toward the camera. No text, logos, watermark, phone, jewelry branding, collage, or UI. One person only."
+    },
+    {
+      "file": "omar.webp",
+      "prompt": "Use case: photorealistic-natural. Asset type: locally bundled synthetic demo portrait for an internal professional matchmaking application's preview screens. Subject: a fictional Black man around age 36 with short textured hair and a relaxed smile, wearing a sand-colored casual shirt, in a softly blurred tree-lined park. Entirely invented adult face; no reference person or recognizable public figure. Medium: natural editorial lifestyle photography, authentic skin texture, soft daylight, calm neutral color palette. Composition: vertical 4:5 portrait, waist-to-head framing, face in upper third with comfortable space above the head, subject looking toward the camera. No text, logos, watermark, phone, jewelry branding, collage, or UI. One person only."
+    }
+  ],
+  "fallback": {
+    "file": "fallback.svg",
+    "source": "Original vector illustration authored for this project."
+  }
+}

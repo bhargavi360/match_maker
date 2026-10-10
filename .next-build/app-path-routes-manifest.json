@@ -1,0 +1,23 @@
+{
+  "/(workspace)/chat/page": "/chat",
+  "/(workspace)/dashboard/page": "/dashboard",
+  "/(workspace)/email/page": "/email",
+  "/(workspace)/matches/page": "/matches",
+  "/(workspace)/profiles/[id]/edit/page": "/profiles/[id]/edit",
+  "/(workspace)/profiles/[id]/page": "/profiles/[id]",
+  "/(workspace)/profiles/new/page": "/profiles/new",
+  "/(workspace)/profiles/page": "/profiles",
+  "/(workspace)/settings/page": "/settings",
+  "/(workspace)/workflow/page": "/workflow",
+  "/_global-error/page": "/_global-error",
+  "/_not-found/page": "/_not-found",
+  "/api/auth/[...path]/route": "/api/auth/[...path]",
+  "/api/bootstrap/route": "/api/bootstrap",
+  "/api/webhooks/resend/route": "/api/webhooks/resend",
+  "/api/workspace/[...path]/route": "/api/workspace/[...path]",
+  "/icon.svg/route": "/icon.svg",
+  "/login/page": "/login",
+  "/page": "/",
+  "/register/page": "/register",
+  "/setup/page": "/setup"
+}

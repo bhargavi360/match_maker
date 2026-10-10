@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "functions": {
+    "/api/auth/[...path]": {},
+    "/api/bootstrap": {},
+    "/api/webhooks/resend": {},
+    "/api/workspace/[...path]": {}
+  }
+}

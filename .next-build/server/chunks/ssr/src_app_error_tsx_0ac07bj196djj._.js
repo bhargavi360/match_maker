@@ -1,0 +1,3 @@
+module.exports=[23953,a=>{"use strict";var b=a.i(87924),c=a.i(58918);a.s(["default",0,function({retry:a}){return(0,b.jsxs)("div",{className:"empty-state panel",role:"alert",children:[(0,b.jsx)("h1",{children:"The screen could not open."}),(0,b.jsx)("p",{children:"Try loading this screen again. Check the current saved state before repeating an operation."}),(0,b.jsx)(c.K,{onClick:a,children:"Try again"})]})}])}];
+
+//# sourceMappingURL=src_app_error_tsx_0ac07bj196djj._.js.map

@@ -1,0 +1,56 @@
+{
+  "name": "matchmaker-ai-rebuild",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "test": "node --conditions=react-server --import tsx --test tests/*.test.ts",
+    "test:stage10": "node --conditions=react-server --import tsx --test tests/stage10.test.ts",
+    "dev": "next dev --hostname 127.0.0.1 --port 3100",
+    "prebuild": "prisma generate --config prisma7.config.ts",
+    "build": "next build",
+    "start": "next start --hostname 127.0.0.1 --port 3100",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --max-warnings=0",
+    "test:e2e": "node scripts/browser-tests.mjs",
+    "local:configure": "node scripts/local-configure.mjs",
+    "db:generate": "prisma generate --config prisma7.config.ts",
+    "db:migrate": "tsx scripts/database.ts",
+    "test:security": "node --conditions=react-server --import tsx --test tests/security.test.ts",
+    "test:matching": "node --import tsx --test tests/matching.test.ts",
+    "test:stage5": "node --conditions=react-server --import tsx --test tests/stage5-security.test.ts",
+    "test:workflow": "node --import tsx --test tests/workflow.test.ts",
+    "test:stage6": "node --conditions=react-server --import tsx --test tests/stage6-security.test.ts",
+    "test:email": "node --import tsx --test tests/email.test.ts",
+    "test:stage7": "node --conditions=react-server --import tsx --test tests/stage7-security.test.ts",
+    "test:stage8": "node --conditions=react-server --import tsx --test tests/stage8-security.test.ts"
+  },
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "dependencies": {
+    "@google/genai": "2.28.0",
+    "@next/env": "16.4.0",
+    "@prisma/adapter-better-sqlite3": "7.10.0",
+    "@prisma/client": "7.10.0",
+    "better-auth": "1.7.7",
+    "next": "16.4.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "resend": "6.32.1",
+    "server-only": "0.0.1",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@playwright/test": "1.64.0",
+    "@types/node": "24.19.1",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.4.0",
+    "prisma": "7.10.0",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3"
+  },
+  "type": "module"
+}

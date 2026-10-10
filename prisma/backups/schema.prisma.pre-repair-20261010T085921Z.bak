@@ -1,0 +1,258 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  MATCHMAKER
+}
+
+enum MatchStatus {
+  SUGGESTED
+  APPROVED
+  REJECTED
+  CONTACTED
+}
+
+enum EmailStatus {
+  DRAFT
+  SENT
+}
+
+enum ConversationType {
+  ASSISTANT
+  DIRECT
+}
+
+enum SenderType {
+  MATCHMAKER
+  CUSTOMER
+  AI
+  SYSTEM
+}
+
+enum MessageStatus {
+  SENT
+  DELIVERED
+  READ
+}
+
+model User {
+  id                  String        @id @default(cuid())
+  email               String        @unique
+  passwordHash        String
+  name                String
+  role                UserRole      @default(MATCHMAKER)
+  onboarded           Boolean       @default(false)
+  welcomeCompletedAt  DateTime?
+  metadata            Json?
+  onboardingProfile   OnboardingProfile?
+  profiles            Profile[]
+  activityLogs        ActivityLog[]
+  conversations       Conversation[]
+  settings            UserSetting?
+  savedSearches       SavedSearch[]
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+}
+
+model Profile {
+  id                  String         @id @default(cuid())
+  fullName            String
+  age                 Int
+  gender              String
+  location            String
+  education           String
+  occupation          String
+  community           String         @default("")
+  height              String         @default("")
+  interests           Json
+  diet                String         @default("")
+  smoking             String         @default("")
+  drinking            String         @default("")
+  about               String         @default("")
+  relationshipGoal    String         @default("")
+  preferredAgeMin     Int?
+  preferredAgeMax     Int?
+  preferredGender     String         @default("Any")
+  preferredLocation   String         @default("")
+  preferredEducation  String         @default("")
+  preferredOccupation String         @default("")
+  dealBreakers        String         @default("")
+  mustHaves           String         @default("")
+  introductionConsent Boolean        @default(false)
+  completenessScore   Int            @default(0)
+  archived            Boolean        @default(false)
+  ownerId             String
+  owner               User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  matches             Match[]        @relation("MatchProfile")
+  candidateMatches    Match[]        @relation("MatchCandidate")
+  emails              Email[]
+  conversations       Conversation[]
+  portalLinks         PortalLink[]
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+
+  @@index([gender, location, age])
+  @@index([ownerId])
+  @@index([ownerId, gender, location, age])
+}
+
+model Match {
+  id                  String       @id @default(cuid())
+  profileId           String
+  candidateId         String
+  compatibilityScore  Int
+  aiScore             Int?
+  ruleScore           Int?
+  strengths           Json
+  concerns            Json
+  explanation         Json?
+  icebreakers         Json?
+  status              MatchStatus  @default(SUGGESTED)
+  rejectionReason     String?
+  metadata            Json?
+  profile             Profile      @relation("MatchProfile", fields: [profileId], references: [id], onDelete: Cascade)
+  candidate           Profile      @relation("MatchCandidate", fields: [candidateId], references: [id], onDelete: Cascade)
+  emails              Email[]
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  @@index([profileId, status])
+  @@index([candidateId])
+}
+
+model Email {
+  id         String      @id @default(cuid())
+  matchId    String
+  profileId  String
+  subject    String
+  body       String
+  tone       String
+  status     EmailStatus @default(DRAFT)
+  sentAt     DateTime?
+  metadata   Json?
+  match      Match       @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  profile    Profile     @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@index([profileId])
+  @@index([matchId])
+}
+
+model Conversation {
+  id                 String           @id @default(cuid())
+  type               ConversationType
+  profileId          String?
+  ownerId            String
+  title              String           @default("")
+  lastMessagePreview String           @default("")
+  unreadCount        Int              @default(0)
+  summary            String           @default("")
+  metadata           Json?
+  profile            Profile?         @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  owner              User             @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  messages           Message[]
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  @@index([profileId])
+  @@index([updatedAt])
+}
+
+model Message {
+  id             String          @id @default(cuid())
+  conversationId String
+  senderType     SenderType
+  content        String
+  status         MessageStatus   @default(SENT)
+  metadata       Json?
+  conversation   Conversation    @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@index([conversationId, createdAt])
+}
+
+model ActivityLog {
+  id         String    @id @default(cuid())
+  type       String
+  message    String
+  entityType String?
+  entityId   String?
+  userId     String
+  metadata   Json?
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([createdAt])
+  @@index([userId])
+}
+
+model PortalLink {
+  id        String   @id @default(cuid())
+  profileId String
+  tokenHash String   @unique
+  expiresAt DateTime
+  profile   Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([profileId])
+  @@index([expiresAt])
+}
+
+model SavedSearch {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  filters   Json
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([userId])
+}
+
+model UserSetting {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  theme           String   @default("light")
+  aiModel         String   @default("gemini-2.5-flash")
+  notificationsOn Boolean  @default(true)
+  defaultEmailTone String  @default("Warm")
+  preferredLanguage String @default("English")
+  notifyNewMessages Boolean @default(true)
+  notifyMatchUpdates Boolean @default(true)
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model OnboardingProfile {
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  fullName            String   @default("")
+  phone               String   @default("")
+  roleTitle           String   @default("")
+  languages           String   @default("[]")
+  communities         String   @default("[]")
+  ageGroups           String   @default("[]")
+  relationshipGoals   String   @default("[]")
+  defaultEmailTone    String   @default("Warm")
+  preferredLanguage   String   @default("English")
+  notifyNewMessages   Boolean  @default(true)
+  notifyMatchUpdates  Boolean  @default(true)
+  consentCustomerData Boolean  @default(false)
+  consentAIProcessing Boolean  @default(false)
+  currentStep         Int      @default(1)
+  completedAt         DateTime?
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
